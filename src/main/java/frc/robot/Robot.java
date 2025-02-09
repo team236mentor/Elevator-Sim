@@ -42,12 +42,15 @@ public class Robot extends TimedRobot {
     try {
        currentPath = PathPlannerPath.fromPathFile("top-zero_Bottom");
         } catch (IOException e) {
-          System.out.println("IO exception Blue45_i :");e.printStackTrace();
+          System.out.println("IO exception top-zero_Bottom :");e.printStackTrace();
           } catch (ParseException e) {
-          System.out.println("ParseException Blue45_i :");e.printStackTrace();
+          System.out.println("ParseException top-zero_Bottom :");e.printStackTrace();
         }  catch (FileVersionException e) {
-          System.out.println("FileVersionException Blue45_i :");e.printStackTrace();
+          System.out.println("FileVersionException top-zero_Bottom :");e.printStackTrace();
         }
+
+    
+
     // try {
     //   pathList= PathPlannerAuto.getPathGroupFromAutoFile("auto1");
     //     } catch (IOException e) {
