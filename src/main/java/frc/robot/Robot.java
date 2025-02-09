@@ -40,13 +40,13 @@ public class Robot extends TimedRobot {
     PathPlannerTrajectory p_trajectory;
     Pose2d currentPose = new Pose2d();
     try {
-       currentPath = PathPlannerPath.fromPathFile("top-zero_Bottom");
+       currentPath = PathPlannerPath.fromPathFile("2Left45_Reef-K");
         } catch (IOException e) {
-          System.out.println("IO exception top-zero_Bottom :");e.printStackTrace();
+          System.out.println("IO exception 2Left45_Reef-K :");e.printStackTrace();
           } catch (ParseException e) {
-          System.out.println("ParseException top-zero_Bottom :");e.printStackTrace();
+          System.out.println("ParseException 2Left45_Reef-K :");e.printStackTrace();
         }  catch (FileVersionException e) {
-          System.out.println("FileVersionException top-zero_Bottom :");e.printStackTrace();
+          System.out.println("FileVersionException 2Left45_Reef-K :");e.printStackTrace();
         }
 
     
@@ -72,27 +72,16 @@ public class Robot extends TimedRobot {
     System.out.println("***********");
     System.out.println("           ");
    
-    for (int j = 0; j < currentPath.getWaypoints().size(); j++) {
+    for (int j = 0; j < currentPath.getWaypoints().size()-1; j++) {
      System.out.println("getWayPoints() :" + currentPath.getWaypoints().get(j).toString() );
     }
 
-    System.out.println("***********");
-    System.out.println("currentPath getStartingHolonomicPose() " + currentPath.getStartingHolonomicPose().toString() );
+   // System.out.println("***********");
+   // System.out.println("currentPath getStartingHolonomicPose() " + currentPath.getStartingHolonomicPose().toString() );
     
     SmartDashboard.putData("Field", m_field);
     //m_field.setRobotPose(currentPose);
     m_field.getObject("tarject").setPoses(currentPath.getPathPoses());
-    // m_field.setRobotPose(currentPath.getPathPoses().get(0));
-    // m_field.setRobotPose(currentPath.getPathPoses().get(1));
-    // m_field.setRobotPose(currentPath.getPathPoses().get(2));
-    // m_field.setRobotPose(currentPath.getPathPoses().get(3));
-
-    // for (int i = 0; i < currentPath.getPathPoses().size(); i++) {
-    //   String str= "Position-" + i;
-    //   m_field.getObject(str).setPose(currentPose);
-    //   //setPose(m_field.setRobotPose(currentPath.getPathPoses().get(i)) );
-    // }
-
 
   }
 
