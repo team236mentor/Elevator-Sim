@@ -40,7 +40,7 @@ public class Robot extends TimedRobot {
     PathPlannerTrajectory p_trajectory;
     Pose2d currentPose = new Pose2d();
     try {
-       currentPath = PathPlannerPath.fromPathFile("Blue45_i");
+       currentPath = PathPlannerPath.fromPathFile("top-zero_Bottom");
         } catch (IOException e) {
           System.out.println("IO exception Blue45_i :");e.printStackTrace();
           } catch (ParseException e) {
