@@ -42,21 +42,25 @@ public class Robot extends TimedRobot {
   private static ElevatorManualMove elevatorManual = new ElevatorManualMove(elevator);
   
   private static Field2d m_field = new Field2d();
+
   private PathPlannerPath currentPath,flipCurrentPath;
+  private List<PathPlannerPath> pathList;
+
   private Rotation2d startRotation, endRotation;
  
-  private List<PathPoint> pointList= null;
-  private List<PathPoint> trimList= null;
-  private Pose2d startPose, endPose;
-  private Translation2d start, end;
-  private List<Translation2d> midWaypoints = null;
+  private List<PathPoint> pointList = new ArrayList<>();
+  private List<PathPoint> trimList = new ArrayList<>();
 
-// private List<PathPlannerPath> pathList;
-// private RobotConfig config;
+  private Pose2d startPose, endPose;
+  private List<Pose2d> poseList = new ArrayList<>();
+
+  private Translation2d start, end;
+  public List<Translation2d> midWaypoints = new ArrayList<>();
+
+  private RobotConfig config;
+  
 // private List<Translation2d> interiorWaypoints = null;
 // private List<Waypoint> waypointList = null;
-// private List<Pose2d> poseList = null;
-// private Pose2d currentPose = new Pose2d();
 
   public Robot() {
     
@@ -88,9 +92,6 @@ public class Robot extends TimedRobot {
 
     //NamedCommands.registerCommand("ElevatorUp",ElevatorUp );
 
-    // System.out.println("currentPath getPathPoses() " + currentPath.getPathPoses().toString());
-    // System.out.println("currentPath getStartingHolonomicPose() " + currentPath.getStartingHolonomicPose().toString());
-    
     flipCurrentPath = currentPath.flipPath();
     //System.out.println("currentPath getPathPoses() " + currentPath.flipPath() );
     
@@ -112,21 +113,21 @@ public class Robot extends TimedRobot {
     
       SmartDashboard.putData("Field", m_field);
       //publish paths to Field2d 
-      //  m_field.getObject("primary").setPoses(currentPath.getPathPoses());
-          m_field.getObject("flipped").setPoses(flipCurrentPath.getPathPoses()); 
-      //  m_field.getObject("mirrored").setPoses(flipCurrentPath.mirrorPath().getPathPoses()); 
+        //  m_field.getObject("primary").setPoses(currentPath.getPathPoses());
+        m_field.getObject("flipped").setPoses(flipCurrentPath.getPathPoses()); 
+        //  m_field.getObject("mirrored").setPoses(flipCurrentPath.mirrorPath().getPathPoses()); 
     
         poseList = currentPath.getPathPoses();
   
       // remove the LAST and FIRST entree without modifying original pointList
-        trimList = new ArrayList<>(pointList);
+          trimList.addAll(pointList);
           trimList.remove(pointList.size()-1);    // LAST removed
           trimList.remove(0 );              // FIRST removed
 
           // ignore first point and last point (size - 1 )
           //  for (int i=1; i < trimList.size() - 1 ; i++ ) {  // was skipping FIRST and LAST
           for (int i =0; i < trimList.size() ; i++ ) {         // process all List elements
-             // System.out.println("pose(1) :" + pointList.get(i).position.toString() );
+              System.out.println("pose" + i + " :" + pointList.get(i).position.toString() );
               midWaypoints.add(pointList.get(i).position );
           }
 
@@ -148,16 +149,22 @@ public class Robot extends TimedRobot {
             //    currentPath.getPathPoses().get(0).getY(),
             //    startRotation);
 
+            for (int index = 0; index < midWaypoints.size(); index++) 
+            {
+              m_field.getObject("points_"+ index).setPose(midWaypoints.get(index).getX(), 
+                midWaypoints.get(index).getX(), 
+                new Rotation2d() );
+            }
+
      Trajectory trajectory = TrajectoryGenerator.generateTrajectory(
         startPose, 
         midWaypoints, 
         endPose, 
-        new TrajectoryConfig(3, 2.9));
+        new TrajectoryConfig(3, 2.9) );
 
-      // System.out.println("trajectory: " + trajectory.toString() );
-
-
-  }
+      // System.out.println( "trajectory: " + trajectory.toString() );
+        }
+      
 
   @Override
   public void robotPeriodic() {
