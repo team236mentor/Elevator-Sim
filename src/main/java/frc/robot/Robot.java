@@ -52,9 +52,6 @@ public class Robot extends TimedRobot {
   private List<PathPoint> pointList = new ArrayList<>();
   private List<PathPoint> trimList = new ArrayList<>();
 
-  private List<PathPoint> pointList = new ArrayList<>();
-  private List<PathPoint> trimList = new ArrayList<>();
-
   private Pose2d startPose, endPose;
   private List<Pose2d> poseList = new ArrayList<>();
 
