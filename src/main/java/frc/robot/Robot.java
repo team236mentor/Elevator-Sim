@@ -128,8 +128,8 @@ public class Robot extends TimedRobot {
 
           // ignore first point and last point (size - 1 )
           //  for (int i=1; i < trimList.size() - 1 ; i++ ) {  // was skipping FIRST and LAST
-          for (int i =0; i < trimList.size() ; i++ ) {         // process all List elements
-              System.out.println("pose" + i + " :" + pointList.get(i).position.toString() );
+          for (int i =0; i < trimList.size()-1 ; i++ ) {         // process all List elements
+              System.out.println("pose" + i + " :" + trimList.get(i).position.toString() );
               midWaypoints.add(pointList.get(i).position );
           }
 
