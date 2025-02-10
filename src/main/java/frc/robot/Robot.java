@@ -5,6 +5,7 @@
 package frc.robot;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.json.simple.parser.ParseException;
@@ -27,6 +28,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import frc.robot.subsystems.Elevator;
 
 /** This is a sample program to demonstrate the use of elevator simulation. */
@@ -42,12 +44,14 @@ public class Robot extends TimedRobot {
   private List<PathPlannerPath> pathList;
   private RobotConfig config;
 
-  private List<Translation2d> interiorWaypoints;
-  private List<Waypoint> waypointList;
-  private List<Pose2d> poseList;
+  private List<Translation2d> interiorWaypoints = null;
+  private List<Waypoint> waypointList = null;
+  private List<Pose2d> poseList = null;
   private PathPlannerTrajectory p_trajectory;
   private Pose2d currentPose = new Pose2d();
   private Pose2d startPose, endPose;
+  private Translation2d start, end;
+
 
   public Robot() {
 
@@ -55,7 +59,7 @@ public class Robot extends TimedRobot {
        currentPath = PathPlannerPath.fromPathFile("2Left45_Reef-K");
         } catch (IOException e) {
           System.out.println("IO exception 2Left45_Reef-K :");e.printStackTrace();
-          } catch (ParseException e) {
+        } catch (ParseException e) {
           System.out.println("ParseException 2Left45_Reef-K :");e.printStackTrace();
         }  catch (FileVersionException e) {
           System.out.println("FileVersionException 2Left45_Reef-K :");e.printStackTrace();
@@ -79,29 +83,26 @@ public class Robot extends TimedRobot {
 
         
     // don't getAllPathPoints: is not of any value      currentPath.getAllPathPoints() 
-    //
+    
     System.out.println("currentPath getPathPoses() " + currentPath.getPathPoses().toString());
-    System.out.println("currentPath getStartingHolonomicPose() " + currentPath.getStartingHolonomicPose().toString());
+    //System.out.println("currentPath getStartingHolonomicPose() " + currentPath.getStartingHolonomicPose().toString());
     
     flipCurrentPath = currentPath.flipPath();
     //System.out.println("currentPath getPathPoses() " + currentPath.flipPath() );
     
-    System.out.println("currentPath getPathPoses() " + currentPath.getPathPoses().toString() );
-    System.out.println("*** poses *****");
     // System.out.println("currentPath getIdealTrajectory(config) " + currentPath.getIdealTrajectory(config).toString() );
    
-    // for (int j = 0; j < currentPath.getWaypoints().size()-1; j++) {
-    //  System.out.println("getWayPoints() :" + currentPath.getWaypoints().get(j).toString() );
-    // }
+   
+    System.out.println("getWayPoints(0) :" + currentPath.getWaypoints().get(0).anchor().div(1) );
+    System.out.println("getWayPoints(1) :" + currentPath.getWaypoints().get(1).anchor().div(1) );
 
    // System.out.println("***********");
    // System.out.println("currentPath getStartingHolonomicPose() " + currentPath.getStartingHolonomicPose().toString() );
     
     SmartDashboard.putData("Field", m_field);
-      
-    //publish paths to Field2d 
+      //publish paths to Field2d 
       m_field.getObject("primary").setPoses(currentPath.getPathPoses());
-    //  m_field.getObject("flipped").setPoses(flipCurrentPath.getPathPoses()); 
+      //  m_field.getObject("flipped").setPoses(flipCurrentPath.getPathPoses()); 
       m_field.getObject("mirrored").setPoses(flipCurrentPath.mirrorPath().getPathPoses()); 
     
     // not clear how to get get just X and Y waypoint values for WPILIB math tarjectory
@@ -113,38 +114,50 @@ public class Robot extends TimedRobot {
         //for (int index = 0; index < waypointList.size()-1; index++) {
         //do we need to skip start and end points?
         int size = currentPath.getPathPoses().size();
-        for (int i = 0; i < size; i++) {
-          // currentPath.getPathPoses().remove(1);
-          // Translation2d way = new Translation2d(
-            System.out.println("currentPath pathPoint-" + i + currentPath.get(i).getPoint());
-          // currentPath.get(i).getPoint(), 6.03); 
-          // interiorWaypoints.add(way);
-        }
-        Translation2d way = new Translation2d(5.39, 6.03); 
-        interiorWaypoints.add(way);
-        //}
+            for (int i = 0; i < size; i++) {
+              // currentPath.getPathPoses().remove(1);
+              // Translation2d way = new Translation2d(
+          //      System.out.println("currentPath pathPoint-" + i +" " + currentPath.getPathPoses().get(i).div(1).toString());
+              // currentPath.get(i).getPoint(), 6.03); 
+              // interiorWaypoints.add(way);
+            }
+
+        // TODO Translation2d way = start; 
+        // interiorWaypoints =  new ArrayList<Translation2d>();
+        // interiorWaypoints.add(way);
 
         startRotation = currentPath.getIdealStartingState().rotation();
         endRotation = currentPath.getGoalEndState().rotation();
-        startPose = new Pose2d( 
-          currentPath.getPathPoses().get(0).getX(),
-          currentPath.getPathPoses().get(0).getY(),
-          startRotation);
-        endPose = new Pose2d( 
-           currentPath.getPathPoses().get(0).getX(),
-           currentPath.getPathPoses().get(0).getY(),
-           startRotation);
+        start = currentPath.getWaypoints().get(0).anchor().div(1);
+        end = currentPath.getWaypoints().get(1).anchor().div(1);
+        
+        //TODO 
+        // startPose = new Pose2d( start , startRotation);
+        
+            // startPose = new Pose2d( 
+            //   currentPath.getPathPoses().get(0).getX(),
+            //   currentPath.getPathPoses().get(0).getY(),
+            //   startRotation);
+        
+        //TODO 
+        //endPose = new Pose2d(end , endRotation);
+        
+            // endPose = new Pose2d( 
+            //    currentPath.getPathPoses().get(0).getX(),
+            //    currentPath.getPathPoses().get(0).getY(),
+            //    startRotation);
 
-     Trajectory trajectory = TrajectoryGenerator.generateTrajectory(
-        startPose, 
-        interiorWaypoints, 
-        endPose, 
-        new TrajectoryConfig(3, 2.9));
+    //  Trajectory trajectory = TrajectoryGenerator.generateTrajectory(
+    //     startPose, 
+    //     interiorWaypoints, 
+    //     endPose, 
+    //     new TrajectoryConfig(3, 2.9));
 
-      System.out.println("**** trajectory *****");
-      System.out.println("trajectory: " + trajectory.toString() );
-      System.out.println("**** trajectory *****");
-      // m_field.setRobotPose(currentPose);
+    //   System.out.println("**** trajectory *****");
+    //   System.out.println("trajectory: " + trajectory.toString() );
+    //   System.out.println("**** trajectory *****");
+
+    //  m_field.setRobotPose(end);
   }
 
   @Override
