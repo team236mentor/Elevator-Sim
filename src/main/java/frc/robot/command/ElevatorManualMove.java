@@ -16,7 +16,7 @@ public class ElevatorManualMove extends Command {
     
     this.elevator=elevator;
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(this.elevator);
+    // addRequirements(this.elevator);
   }
 
   // Called when the command is initially scheduled.
