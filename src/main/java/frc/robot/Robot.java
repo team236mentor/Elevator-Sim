@@ -43,11 +43,17 @@ public class Robot extends TimedRobot {
   
   private static Field2d m_field = new Field2d();
 
+
   private PathPlannerPath currentPath,flipCurrentPath;
+  private List<PathPlannerPath> pathList;
+
   private List<PathPlannerPath> pathList;
 
   private Rotation2d startRotation, endRotation;
  
+  private List<PathPoint> pointList = new ArrayList<>();
+  private List<PathPoint> trimList = new ArrayList<>();
+
   private List<PathPoint> pointList = new ArrayList<>();
   private List<PathPoint> trimList = new ArrayList<>();
 
@@ -120,6 +126,7 @@ public class Robot extends TimedRobot {
         poseList = currentPath.getPathPoses();
   
       // remove the LAST and FIRST entree without modifying original pointList
+          trimList.addAll(pointList);
           trimList.addAll(pointList);
           trimList.remove(pointList.size()-1);    // LAST removed
           trimList.remove(0 );              // FIRST removed
