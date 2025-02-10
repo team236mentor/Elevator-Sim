@@ -120,13 +120,14 @@ public class Robot extends TimedRobot {
 
         trimList = pointList;
         // remove the LAST and FIRST entree
-        trimList.remove(pointList.size()-1);
-        trimList.remove(0 );
+          // trimList.remove(pointList.size()-1);
+          // trimList.remove(0 );
 
         int size = trimList.size();
-            for (int i = 0; i < size - 1 ; i++ ) {
+            for (int i =1; i < size - 1 ; i++ ) {
               System.out.println("pose(1) :" + trimList.get(i).toString() );
-              midWaypoints.add(i, trimList.get(i).position );
+              midWaypoints.add(trimList.get(i).position );
+              
           }
 
         // TODO Translation2d way = start; 
