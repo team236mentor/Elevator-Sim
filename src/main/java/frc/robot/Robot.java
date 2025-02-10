@@ -42,21 +42,28 @@ public class Robot extends TimedRobot {
   private static ElevatorManualMove elevatorManual = new ElevatorManualMove(elevator);
   
   private static Field2d m_field = new Field2d();
+
   private PathPlannerPath currentPath,flipCurrentPath;
+  private List<PathPlannerPath> pathList;
+
   private Rotation2d startRotation, endRotation;
  
-  private List<PathPoint> pointList= null;
-  private List<PathPoint> trimList= null;
-  private Pose2d startPose, endPose;
-  private Translation2d start, end;
-  private List<Translation2d> midWaypoints = null;
+  private List<PathPoint> pointList = new ArrayList<>();
+  private List<PathPoint> trimList = new ArrayList<>();
 
-// private List<PathPlannerPath> pathList;
-// private RobotConfig config;
+  private Pose2d startPose, endPose;
+  // private Pose2d currentPose = new Pose2d();
+  private List<Pose2d> poseList = new ArrayList<>();
+
+  private Translation2d start, end;
+  private List<Translation2d> midWaypoints = new ArrayList<>();
+
+  private RobotConfig config;
+  
 // private List<Translation2d> interiorWaypoints = null;
 // private List<Waypoint> waypointList = null;
-// private List<Pose2d> poseList = null;
-// private Pose2d currentPose = new Pose2d();
+
+
 
   public Robot() {
     
@@ -119,7 +126,7 @@ public class Robot extends TimedRobot {
         poseList = currentPath.getPathPoses();
   
       // remove the LAST and FIRST entree without modifying original pointList
-        trimList = new ArrayList<>(pointList);
+          trimList.addAll(pointList);
           trimList.remove(pointList.size()-1);    // LAST removed
           trimList.remove(0 );              // FIRST removed
 
