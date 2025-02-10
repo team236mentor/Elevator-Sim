@@ -43,13 +43,15 @@ public class Robot extends TimedRobot {
   
   private static Field2d m_field = new Field2d();
 
-
   private PathPlannerPath currentPath,flipCurrentPath;
   private List<PathPlannerPath> pathList;
 
 
   private Rotation2d startRotation, endRotation;
  
+  private List<PathPoint> pointList = new ArrayList<>();
+  private List<PathPoint> trimList = new ArrayList<>();
+
   private List<PathPoint> pointList = new ArrayList<>();
   private List<PathPoint> trimList = new ArrayList<>();
 
