@@ -5,30 +5,24 @@
 package frc.robot;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.json.simple.parser.ParseException;
 
-import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.path.PathPoint;
 import com.pathplanner.lib.path.Waypoint;
 import com.pathplanner.lib.trajectory.PathPlannerTrajectory;
 import com.pathplanner.lib.util.FileVersionException;
 
-import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.trajectory.Trajectory;
-import edu.wpi.first.math.trajectory.TrajectoryConfig;
-import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import frc.robot.subsystems.Elevator;
 
 /** This is a sample program to demonstrate the use of elevator simulation. */
@@ -47,10 +41,15 @@ public class Robot extends TimedRobot {
   private List<Translation2d> interiorWaypoints = null;
   private List<Waypoint> waypointList = null;
   private List<Pose2d> poseList = null;
+
+  private List<PathPoint> pointList= null;
+  private List<PathPoint> trimList= null;
+
   private PathPlannerTrajectory p_trajectory;
   private Pose2d currentPose = new Pose2d();
   private Pose2d startPose, endPose;
   private Translation2d start, end;
+  private List<Translation2d> midWaypoints = null;
 
 
   public Robot() {
@@ -82,7 +81,7 @@ public class Robot extends TimedRobot {
     //     }
 
         
-    // don't getAllPathPoints: is not of any value      currentPath.getAllPathPoints() 
+    // don't getAllPathPoints: is not of any value  ??     
     
     System.out.println("currentPath getPathPoses() " + currentPath.getPathPoses().toString());
     //System.out.println("currentPath getStartingHolonomicPose() " + currentPath.getStartingHolonomicPose().toString());
@@ -91,8 +90,13 @@ public class Robot extends TimedRobot {
     //System.out.println("currentPath getPathPoses() " + currentPath.flipPath() );
     
     // System.out.println("currentPath getIdealTrajectory(config) " + currentPath.getIdealTrajectory(config).toString() );
-   
-   
+    try {
+      pointList= currentPath.getAllPathPoints();
+      } catch (Exception e) { 
+        System.out.println("error" + e); 
+      }
+
+      
     System.out.println("getWayPoints(0) :" + currentPath.getWaypoints().get(0).anchor().div(1) );
     System.out.println("getWayPoints(1) :" + currentPath.getWaypoints().get(1).anchor().div(1) );
 
@@ -102,25 +106,28 @@ public class Robot extends TimedRobot {
     SmartDashboard.putData("Field", m_field);
       //publish paths to Field2d 
       m_field.getObject("primary").setPoses(currentPath.getPathPoses());
-      //  m_field.getObject("flipped").setPoses(flipCurrentPath.getPathPoses()); 
-      m_field.getObject("mirrored").setPoses(flipCurrentPath.mirrorPath().getPathPoses()); 
+      m_field.getObject("flipped").setPoses(flipCurrentPath.getPathPoses()); 
+      // m_field.getObject("mirrored").setPoses(flipCurrentPath.mirrorPath().getPathPoses()); 
     
     // not clear how to get get just X and Y waypoint values for WPILIB math tarjectory
       // List<getWayPoint> ; 
-      // List<Waypoint> waypointList = currentPath.getPathPoses();
+      poseList = currentPath.getPathPoses();
   
       // System.out.println("waypointSize: " + waypointList);
 
         //for (int index = 0; index < waypointList.size()-1; index++) {
         //do we need to skip start and end points?
-        int size = currentPath.getPathPoses().size();
-            for (int i = 0; i < size; i++) {
-              // currentPath.getPathPoses().remove(1);
-              // Translation2d way = new Translation2d(
-          //      System.out.println("currentPath pathPoint-" + i +" " + currentPath.getPathPoses().get(i).div(1).toString());
-              // currentPath.get(i).getPoint(), 6.03); 
-              // interiorWaypoints.add(way);
-            }
+
+        trimList = pointList;
+        // remove the LAST and FIRST entree
+        trimList.remove(pointList.size()-1);
+        trimList.remove(0 );
+
+        int size = trimList.size();
+            for (int i = 0; i < size - 1 ; i++ ) {
+              System.out.println("pose(1) :" + trimList.get(i).toString() );
+              midWaypoints.add(i, trimList.get(i).position );
+          }
 
         // TODO Translation2d way = start; 
         // interiorWaypoints =  new ArrayList<Translation2d>();
@@ -128,6 +135,7 @@ public class Robot extends TimedRobot {
 
         startRotation = currentPath.getIdealStartingState().rotation();
         endRotation = currentPath.getGoalEndState().rotation();
+
         start = currentPath.getWaypoints().get(0).anchor().div(1);
         end = currentPath.getWaypoints().get(1).anchor().div(1);
         
