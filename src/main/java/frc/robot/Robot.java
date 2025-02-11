@@ -42,7 +42,7 @@ public class Robot extends TimedRobot {
   private final static Elevator elevator = new Elevator();
 
   // create Commands
-  private static ElevatorManualMove elevatorManual = new ElevatorManualMove(elevator);
+  // private static ElevatorManualMove elevatorManual = new ElevatorManualMove(elevator);
   
   private static Field2d m_field = new Field2d();
 
@@ -62,13 +62,16 @@ public class Robot extends TimedRobot {
   public List<Translation2d> midWaypoints = new ArrayList<>();
 
   private RobotConfig config;
+
+  private Boolean inSimulation=true;
   
 // private List<Translation2d> interiorWaypoints = null;
 // private List<Waypoint> waypointList = null;
 
   public Robot() {
     
-    // read specific path into currentpath from pathplanner file 
+
+    // PATHPLANNER - read specific path into currentpath from pathplanner file 
     // keep this and other reads early in Robot 
     try {
        currentPath = PathPlannerPath.fromPathFile("2Left45_Reef-K");
@@ -80,7 +83,7 @@ public class Robot extends TimedRobot {
           System.out.println("FileVersionException 2Left45_Reef-K :");e.printStackTrace();
         }        
  
-    // required to run pathplanner Auto methodologies not required if running wpilib trajectories
+    // PATHPLANNER - required to run pathplanner Auto methodologies not required if running wpilib trajectories
     // can keep in RobotsConfig or Robots for this simple command class layout
     try {
       config = RobotConfig.fromGUISettings();
@@ -90,11 +93,7 @@ public class Robot extends TimedRobot {
           System.out.println("ParseException fromGUISettings :");e.printStackTrace();
         }
 
-        // Very untested pathplanner getIdealTrajectory method
-        // Optional<PathPlannerTrajectory> opTrajectory = currentPath.getIdealTrajectory(config);
-        // System.out.println("currentPath getIdealTrajectory(config) " + currentPath.getIdealTrajectory(config).toString() );
-
-    // reading a multipath pathplanner auto as pathList 
+    // PATHPLANNER - reading a multipath pathplanner auto as pathList 
     // TODO Evaluate how this is implements parrallel series commands with NamedCommand
     //    NamedCommands.registerCommand("ElevatorUp",ElevatorUp );
           try {
@@ -105,16 +104,15 @@ public class Robot extends TimedRobot {
                 System.out.println("ParseException  :");e.printStackTrace();
               }
 
+      SmartDashboard.putData("Field", m_field);
+      //publish paths to Field2d 
+        
+        m_field.getObject("primary").setPoses(currentPath.getPathPoses());
+        m_field.getObject("mirror_flip").setPoses(currentPath.flipPath().mirrorPath().getPathPoses()); 
+        //m_field.getObject("mirrored").setPoses(flipCurrentPath.mirrorPath().getPathPoses()); 
 
 
-    // if robot is not on Blue Alience then flip the path to run 
-        if (DriverStation.getAlliance()!=null & DriverStation.getAlliance().get() == Alliance.Red ) {
-        flipCurrentPath = currentPath.flipPath();
-        }
-    
-      }
-    
-      
+    }     // end of constructor
 
   @Override
   public void robotPeriodic() {
@@ -154,8 +152,7 @@ public class Robot extends TimedRobot {
   public Trajectory ChangePathPlannerPathtoTrajectory(PathPlannerPath path) {
     /* 
      * starting to convert a specific pathPlannerPath to wpilib trajectory 
-     * this should be method or own utility class for conversion
-    */
+     * this should be method or own utility class for conversion    */
     try {
       pointList= path.getAllPathPoints();
       } catch (Exception e) { 
@@ -168,14 +165,9 @@ public class Robot extends TimedRobot {
       startRotation = path.getIdealStartingState().rotation();
       endRotation = path.getGoalEndState().rotation();
 
+      // trouble shooting 
         // System.out.println("getWayPoints(0) :" + path.getWaypoints().get(0).anchor().div(1) );
         // System.out.println("getWayPoints(1) :" + path.getWaypoints().get(1).anchor().div(1) );
-    
-      SmartDashboard.putData("Field", m_field);
-      //publish paths to Field2d 
-        //  m_field.getObject("primary").setPoses(path.getPathPoses());
-        m_field.getObject("flipped").setPoses(flipCurrentPath.getPathPoses()); 
-        //  m_field.getObject("mirrored").setPoses(flipCurrentPath.mirrorPath().getPathPoses()); 
     
         poseList = path.getPathPoses();
   
@@ -200,7 +192,7 @@ public class Robot extends TimedRobot {
         midWaypoints, 
         endPose, 
         new TrajectoryConfig(3, 2.9) );
-            return traj
+            return traj;
         }
-  }
+
 }
