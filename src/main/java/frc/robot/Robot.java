@@ -141,6 +141,7 @@ public class Robot extends TimedRobot {
 
         // alternate start pose2d creation
             // startPose = new Pose2d( 
+
             //   currentPath.getPathPoses().get(0).getX(),
             //   currentPath.getPathPoses().get(0).getY(),
             //   startRotation);
@@ -153,9 +154,8 @@ public class Robot extends TimedRobot {
 
             for (int index = 0; index < midWaypoints.size(); index++) 
             {
-              m_field.getObject("points_"+ index).setPose(midWaypoints.get(index).getX(), 
-                midWaypoints.get(index).getX(), 
-                new Rotation2d() );
+              m_field.getObject("points_"+ index).setPose( 
+                midWaypoints.get(index).getX(), midWaypoints.get(index).getY(), new Rotation2d() );
             }
 
      Trajectory trajectory = TrajectoryGenerator.generateTrajectory(
