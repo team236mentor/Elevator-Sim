@@ -47,30 +47,23 @@ public class Robot extends TimedRobot {
   private static Field2d m_field = new Field2d();
 
   private PathPlannerPath currentPath,flipCurrentPath;
+
   private List<PathPlannerPath> pathList;
-
-
   private Rotation2d startRotation, endRotation;
- 
   private List<PathPoint> pointList = new ArrayList<>();
   private List<PathPoint> trimList = new ArrayList<>();
-
   private Pose2d startPose, endPose;
   private List<Pose2d> poseList = new ArrayList<>();
-
   private Translation2d start, end;
   public List<Translation2d> midWaypoints = new ArrayList<>();
 
   private RobotConfig config;
-
-  private Boolean inSimulation=true;
-  
+    
 // private List<Translation2d> interiorWaypoints = null;
 // private List<Waypoint> waypointList = null;
 
   public Robot() {
     
-
     // PATHPLANNER - read specific path into currentpath from pathplanner file 
     // keep this and other reads early in Robot 
     try {
@@ -108,10 +101,18 @@ public class Robot extends TimedRobot {
       //publish paths to Field2d 
         
         m_field.getObject("primary").setPoses(currentPath.getPathPoses());
-        m_field.getObject("mirror_flip").setPoses(currentPath.flipPath().mirrorPath().getPathPoses()); 
-        //m_field.getObject("mirrored").setPoses(flipCurrentPath.mirrorPath().getPathPoses()); 
-
-
+        // m_field.getObject("mirror_flip").setPoses(currentPath.flipPath().mirrorPath().getPathPoses()); 
+        
+        m_field.getObject("trajectory").setTrajectory(ChangePathPlannerPathtoTrajectory(currentPath,true ) );
+        
+        // overlay starting ending pose with correct angle
+        m_field.getObject("start").setPose( new Pose2d(currentPath.getWaypoints().get(0).anchor(), currentPath.getIdealStartingState().rotation() ) ); 
+        m_field.getObject("end").setPose( new Pose2d(currentPath.getWaypoints().get(1).anchor(), currentPath.getGoalEndState().rotation() ) ); 
+        
+        // overlay traget mirror path , with starting ending pose with correct angle
+        // m_field.getObject("trajectory").setTrajectory(ChangePathPlannerPathtoTrajectory(currentPath.mirrorPath(),true ) );
+        // m_field.getObject("start").setPose( new Pose2d(currentPath.mirrorPath().getWaypoints().get(0).anchor(), currentPath.mirrorPath().getIdealStartingState().rotation() ) ); 
+        // m_field.getObject("end").setPose( new Pose2d(currentPath.mirrorPath().getWaypoints().get(1).anchor(), currentPath.mirrorPath().getGoalEndState().rotation() ) ); 
     }     // end of constructor
 
   @Override
@@ -149,7 +150,8 @@ public class Robot extends TimedRobot {
     super.close();
   }
 
-  public Trajectory ChangePathPlannerPathtoTrajectory(PathPlannerPath path) {
+  // method to convert pathplannerpath to tarjectory 
+  public Trajectory ChangePathPlannerPathtoTrajectory(PathPlannerPath path,boolean reduce) {
     /* 
      * starting to convert a specific pathPlannerPath to wpilib trajectory 
      * this should be method or own utility class for conversion    */
@@ -164,7 +166,6 @@ public class Robot extends TimedRobot {
 
       startRotation = path.getIdealStartingState().rotation();
       endRotation = path.getGoalEndState().rotation();
-
       // trouble shooting 
         // System.out.println("getWayPoints(0) :" + path.getWaypoints().get(0).anchor().div(1) );
         // System.out.println("getWayPoints(1) :" + path.getWaypoints().get(1).anchor().div(1) );
@@ -174,13 +175,20 @@ public class Robot extends TimedRobot {
       // remove the LAST and FIRST entree without modifying original pointList
           trimList.addAll(pointList);
           trimList.remove(pointList.size()-1);    // LAST removed
-          trimList.remove(0 );                    // FIRST removed
+          trimList.remove(0 );              // FIRST removed
 
-          // ignore first point and last point (size - 1 )
-          //  for (int i=1; i < trimList.size() - 1 ; i++ ) {  // was skipping FIRST and LAST
+      // ignore first point and last point (size - 1 )
           for (int i =0; i < trimList.size(); i++ ) {         // process all List elements
-              System.out.println("pose" + i + " :" + trimList.get(i).position.toString() );
-              midWaypoints.add(trimList.get(i).position );
+            //  System.out.println("pose" + i + " :" + trimList.get(i).position.toString() );
+             
+            //  remove the odd entrees 
+              if (reduce && i % 10 != 0) { 
+                System.out.println("remove" + i + " :" + trimList.get(i).position.toString() );
+                trimList.remove(i); 
+              } else {
+                midWaypoints.add(trimList.get(i).position );
+                System.out.println("traj" + i + " :" + trimList.get(i).position.toString() );
+              } 
           }
 
         startPose = new Pose2d( start , startRotation);
