@@ -208,6 +208,7 @@ public class Robot extends TimedRobot {
 
       // setting up print of pathPlanning path 
       System.out.println("***** Path: "+ path.name.toString() + "***** ");
+       System.out.println("new Pose2d(");
         System.out.println("("+startPose.getTranslation().getX()+"," + startPose.getTranslation().getX()+"," +startPose.getRotation().getRadians() +")" );
           for (PathPoint  point : pointList) {
             System.out.println( "(" + point.position.getX()+"," + point.position.getY() + ")" );
