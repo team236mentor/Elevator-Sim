@@ -14,8 +14,6 @@ import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.PathPoint;
-import com.pathplanner.lib.path.Waypoint;
-import com.pathplanner.lib.trajectory.PathPlannerTrajectory;
 import com.pathplanner.lib.util.FileVersionException;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -28,7 +26,6 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.command.ElevatorManualMove;
 import frc.robot.subsystems.Elevator;
 
 /** This is a sample program to demonstrate the use of elevator simulation. */
@@ -39,139 +36,107 @@ public class Robot extends TimedRobot {
   private final static Elevator elevator = new Elevator();
 
   // create Commands
-  private static ElevatorManualMove elevatorManual = new ElevatorManualMove(elevator);
+  // private static ElevatorManualMove elevatorManual = new ElevatorManualMove(elevator);
   
   private static Field2d m_field = new Field2d();
 
   private PathPlannerPath currentPath,flipCurrentPath;
+  private List<String> stringList;
   private List<PathPlannerPath> pathList;
-
-
   private Rotation2d startRotation, endRotation;
- 
   private List<PathPoint> pointList = new ArrayList<>();
-  private List<PathPoint> trimList = new ArrayList<>();
-
+  private List<Translation2d> trimList = new ArrayList<>();
   private Pose2d startPose, endPose;
-  private List<Pose2d> poseList = new ArrayList<>();
-
-  private Translation2d start, end;
-  public List<Translation2d> midWaypoints = new ArrayList<>();
-
-  private RobotConfig config;
   
+  public List<Translation2d> midWaypoints = new ArrayList<>();
+  private Translation2d start , end;
+  private RobotConfig roboConfig;
+    
 // private List<Translation2d> interiorWaypoints = null;
 // private List<Waypoint> waypointList = null;
 
   public Robot() {
     
-    try {
-       currentPath = PathPlannerPath.fromPathFile("2Left45_Reef-K");
-        } catch (IOException e) {
-          System.out.println("IO exception 2Left45_Reef-K :");e.printStackTrace();
-        } catch (ParseException e) {
-          System.out.println("ParseException 2Left45_Reef-K :");e.printStackTrace();
-        }  catch (FileVersionException e) {
-          System.out.println("FileVersionException 2Left45_Reef-K :");e.printStackTrace();
-        }        
+    // PATHPLANNER - read specific path into currentpath from pathplanner file 
+    // keep this and other reads early in Robot 
+    SmartDashboard.putData("Field", m_field);
+    stringList = new ArrayList<>();
+    stringList.add("RightRight-E");
+    stringList.add("Reef-K_Coral-10");
+    System.out.println(stringList.toString());
+
+    for (String str : stringList) {
+     try {   
+      currentPath = PathPlannerPath.fromPathFile(str);
+      } catch (IOException e) {     //  could convert to single Exception catch
+        System.out.println("IO exception currentPath read :");e.printStackTrace();
+      } catch (ParseException e) {
+        System.out.println("ParseException currentPath read :");e.printStackTrace();
+      }  catch (FileVersionException e) {
+        System.out.println("FileVersionException currentPath read :");e.printStackTrace();
+      }  catch (Exception e ) { 
+        System.out.println("Exception currentPath read :");e.printStackTrace();
+      }       
+            Trajectory traj = ChangePathPlannerPathtoTrajectory(currentPath,false);
+            this.displayPathData(str,traj,false,false); 
+    }
+        
  
-    try {
-      config = RobotConfig.fromGUISettings();
-        } catch (IOException e) {
-          System.out.println("IO exception fromGUISettings :");e.printStackTrace();
-        } catch (ParseException e) {
-          System.out.println("ParseException fromGUISettings :");e.printStackTrace();
-        }
+    // PATHPLANNER - required to run pathplanner Auto methodologies not required if running wpilib trajectories
+    // can keep in RobotsConfig or Robots for this simple command class layout
+        // try {
+          // roboConfig = RobotConfig.fromGUISettings();
+            // } catch (IOException e) {
+              // System.out.println("IO exception fromGUISettings :");e.printStackTrace();
+            // } catch (ParseException e) {
+              // System.out.println("ParseException fromGUISettings :");e.printStackTrace();
+    // }
 
-    try {
-      pathList= PathPlannerAuto.getPathGroupFromAutoFile("auto1");
-        } catch (IOException e) {
-          System.out.println("IOException :");e.printStackTrace();
-          } catch (ParseException e) {
-          System.out.println("ParseException  :");e.printStackTrace();
-        }
+    // PATHPLANNER - reading a multipath pathplanner auto as pathList 
+    // TODO Evaluate how this is implements parrallel series commands with NamedCommand
+    //    NamedCommands.registerCommand("ElevatorUp",ElevatorUp );
+          // try {
+          //   pathList= PathPlannerAuto.getPathGroupFromAutoFile("auto1");
+          //     } catch (IOException e) {
+          //       System.out.println("IOException :");e.printStackTrace();
+          //       } catch (ParseException e) {
+          //       System.out.println("ParseException  :");e.printStackTrace();
+    // }
+  }
 
-    //NamedCommands.registerCommand("ElevatorUp",ElevatorUp );
-
-    flipCurrentPath = currentPath.flipPath();
-    //System.out.println("currentPath getPathPoses() " + currentPath.flipPath() );
-    
-    // System.out.println("currentPath getIdealTrajectory(config) " + currentPath.getIdealTrajectory(config).toString() );
-    try {
-      pointList= currentPath.getAllPathPoints();
-      } catch (Exception e) { 
-        System.out.println("error" + e); 
-      }
-
-      start = currentPath.getWaypoints().get(0).anchor().div(1);
-      end = currentPath.getWaypoints().get(1).anchor().div(1);
-
-      startRotation = currentPath.getIdealStartingState().rotation();
-      endRotation = currentPath.getGoalEndState().rotation();
-
-        // System.out.println("getWayPoints(0) :" + currentPath.getWaypoints().get(0).anchor().div(1) );
-        // System.out.println("getWayPoints(1) :" + currentPath.getWaypoints().get(1).anchor().div(1) );
-    
-      SmartDashboard.putData("Field", m_field);
+    public void displayPathData(String name, Trajectory passedTrajectory,boolean toMirror,boolean toFlip) {
+      Trajectory a_trajectory = passedTrajectory;
       //publish paths to Field2d 
-        //  m_field.getObject("primary").setPoses(currentPath.getPathPoses());
-        m_field.getObject("flipped").setPoses(flipCurrentPath.getPathPoses()); 
-        //  m_field.getObject("mirrored").setPoses(flipCurrentPath.mirrorPath().getPathPoses()); 
-    
-        poseList = currentPath.getPathPoses();
-  
-      // remove the LAST and FIRST entree without modifying original pointList
-          trimList.addAll(pointList);
-          trimList.addAll(pointList);
-          trimList.remove(pointList.size()-1);    // LAST removed
-          trimList.remove(0 );              // FIRST removed
-
-          // ignore first point and last point (size - 1 )
-          //  for (int i=1; i < trimList.size() - 1 ; i++ ) {  // was skipping FIRST and LAST
-          for (int i =0; i < trimList.size(); i++ ) {         // process all List elements
-              System.out.println("pose" + i + " :" + trimList.get(i).position.toString() );
-              midWaypoints.add(trimList.get(i).position );
+          if (toFlip && toMirror){
+            m_field.getObject(name + " mirror_flip").setPoses(currentPath.flipPath().mirrorPath().getPathPoses()); 
+          } else {
+              if(toMirror){
+                //m_field.getObject(name + " mirror").setPoses(currentPath.mirrorPath().getPathPoses());
+              } 
+              if (toFlip){
+               // m_field.getObject(name + " flip").setPoses(currentPath.flipPath().mirrorPath().getPathPoses()); 
+              }
+            //m_field.getObject(name + " primary").setPoses(currentPath.mirrorPath().getPathPoses());
           }
-
-        startPose = new Pose2d( start , startRotation);
-        endPose = new Pose2d(end , endRotation);
-
-        m_field.getObject("startPose").setPose(startPose);
-        m_field.getObject("endPose").setPose(endPose);
-
-        // alternate start pose2d creation
-            // startPose = new Pose2d( 
-
-            //   currentPath.getPathPoses().get(0).getX(),
-            //   currentPath.getPathPoses().get(0).getY(),
-            //   startRotation);
-
-        // alternate end pose2d creation
-            // endPose = new Pose2d( 
-            //    currentPath.getPathPoses().get(0).getX(),
-            //    currentPath.getPathPoses().get(0).getY(),
-            //    startRotation);
-
-            for (int index = 0; index < midWaypoints.size(); index++) 
-            {
-              m_field.getObject("points_"+ index).setPose( 
-                midWaypoints.get(index).getX(), midWaypoints.get(index).getY(), new Rotation2d() );
-            }
-
-     Trajectory trajectory = TrajectoryGenerator.generateTrajectory(
-        startPose, 
-        midWaypoints, 
-        endPose, 
-        new TrajectoryConfig(3, 2.9) );
-
-      // System.out.println( "trajectory: " + trajectory.toString() );
-        }
-      
+          // add pimary and converted trajectory path to field2d
+          m_field.getObject(name + " primary").setPoses(currentPath.getPathPoses());
+          m_field.getObject(name + " trajectory").setTrajectory(a_trajectory);
+        
+        // m_field.getObject("trajectory").setTrajectory(ChangePathPlannerPathtoTrajectory(currentPath,true ) );
+        // overlay starting ending pose with correct angle
+          // m_field.getObject("start").setPose( new Pose2d(currentPath.getWaypoints().get(0).anchor(), currentPath.getIdealStartingState().rotation() ) ); 
+          // m_field.getObject("end").setPose( new Pose2d(currentPath.getWaypoints().get(1).anchor(), currentPath.getGoalEndState().rotation() ) ); 
+        // overlay traget mirror path , with starting ending pose with correct angle
+          // m_field.getObject("trajectory").setTrajectory(ChangePathPlannerPathtoTrajectory(currentPath.mirrorPath(),true ) );
+          // m_field.getObject("start").setPose( new Pose2d(currentPath.mirrorPath().getWaypoints().get(0).anchor(), currentPath.mirrorPath().getIdealStartingState().rotation() ) ); 
+          // m_field.getObject("end").setPose( new Pose2d(currentPath.mirrorPath().getWaypoints().get(1).anchor(), currentPath.mirrorPath().getGoalEndState().rotation() ) ); 
+    } 
+  
 
   @Override
   public void robotPeriodic() {
     // Update the telemetry, including mechanism visualization, regardless of mode.
-    elevator.updateTelemetry();
+    // elevator.updateTelemetry();
   }
 
   @Override
@@ -202,4 +167,60 @@ public class Robot extends TimedRobot {
     elevator.close();
     super.close();
   }
+
+  // method to convert pathplannerpath to tarjectory 
+  public Trajectory ChangePathPlannerPathtoTrajectory(PathPlannerPath path,boolean reduce) {
+    /* 
+     * starting to convert a specific pathPlannerPath to wpilib trajectory 
+     * this should be method or own utility class for conversion    */
+    try {
+      pointList= path.getAllPathPoints();
+      } catch (Exception e) { 
+        System.out.println("error" + e); 
+      }
+
+      // publish the PathPoints to terminal 
+          //   System.out.println("***** PathPoints: "+ path.name.toString() + "***** ");
+//   
+          //   for (PathPoint  point : pointList) {
+          //      System.out.println( "(" + point.position.getX()+"," + point.position.getY() + ")" );
+          //      trimList.add(point.position);
+          //   }
+          //   System.out.println("****END PathPoints ***** ");
+
+      // remove the LAST and FIRST entree without modifying original pointList
+      trimList.remove(0 );              // FIRST pose2d position removed
+      trimList.remove(trimList.size()-1);    // LAST pose2d position removed
+
+        start = path.getWaypoints().get(0).anchor().div(1);
+        end = path.getWaypoints().get(1).anchor().div(1);
+        startRotation = path.getIdealStartingState().rotation();
+        endRotation = path.getGoalEndState().rotation();
+
+      startPose = new Pose2d( start , startRotation);
+      endPose = new Pose2d(end , endRotation);
+
+      TrajectoryConfig config = new TrajectoryConfig(4, 3.9) ;
+
+      // setting up print of pathPlanning path 
+      System.out.println("***** Path: "+ path.name.toString() + "***** ");
+        System.out.println("("+startPose.getTranslation().getX()+"," + startPose.getTranslation().getX()+"," +startPose.getRotation().getRadians() +")" );
+          for (PathPoint  point : pointList) {
+            System.out.println( "(" + point.position.getX()+"," + point.position.getY() + ")" );
+          }
+        System.out.println("("+endPose.getTranslation().getX()+"," + endPose.getTranslation().getX()+"," +endPose.getRotation().getRadians() +")" );
+      System.out.println(" *****END PATH***** ");
+
+    // convert to trajectory 
+    Trajectory exampleTrajectory = TrajectoryGenerator.generateTrajectory(
+            startPose,    // Start at the pathplanner startpoint and orientation
+            // Pass through these interior waypoints
+            trimList ,
+            endPose  ,
+            config  
+            );
+      
+    return exampleTrajectory;
+}
+
 }
