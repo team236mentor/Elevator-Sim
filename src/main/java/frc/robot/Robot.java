@@ -49,7 +49,7 @@ public class Robot extends TimedRobot {
   private Pose2d startPose, endPose;
   
   public List<Translation2d> midWaypoints = new ArrayList<>();
-  private Translation2d start , end;
+  private Translation2d start, end;
   private RobotConfig roboConfig;
     
 // private List<Translation2d> interiorWaypoints = null;
@@ -181,6 +181,7 @@ public class Robot extends TimedRobot {
      * starting to convert a specific pathPlannerPath to wpilib trajectory 
      * this should be method or own utility class for conversion    */
     try {
+      pointList.clear();
       pointList= path.getAllPathPoints();
       } catch (Exception e) { 
         System.out.println("error" + e); 
@@ -190,10 +191,12 @@ public class Robot extends TimedRobot {
           //   System.out.println("***** PathPoints: "+ path.name.toString() + "***** ");
 //   
           for (PathPoint  point : pointList) {
-          //    System.out.println( "(" + point.position.getX()+"," + point.position.getY() + ")" );
+            pointList.clear();
+           if ( pointList.indexOf(point)%3 !=0 ) {
               trimList.add(point.position);
+           } else {  /* skip the point do nothing  */   }
           }
-          //   System.out.println("****END PathPoints ***** ");
+
 
       // remove the LAST and FIRST entree without modifying original pointList
       trimList.remove(0 );              // FIRST pose2d position removed
@@ -213,8 +216,8 @@ public class Robot extends TimedRobot {
       System.out.println("***** Path: "+ path.name.toString() + "***** ");
 
         System.out.println("new Pose2d("+startPose.getTranslation().getX()+"," + startPose.getTranslation().getY()+", new Rotation2d(" + startPose.getRotation().getRadians() +"))," );
-          for (PathPoint  point : trimList) {
-            System.out.println( "new Translation2d(" + point.position.getX()+"," + point.position.getY() + ")," );
+          for (Translation2d  positions : trimList) {
+            System.out.println( "new Translation2d(" + positions.getX()+"," + positions.getY() + ")," );
           }
         System.out.println("new Pose2d("+endPose.getTranslation().getX()+"," + endPose.getTranslation().getY()+", new Rotation2d(" + +endPose.getRotation().getRadians() +")),config" );
         System.out.println(" *****END PATH***** ");
