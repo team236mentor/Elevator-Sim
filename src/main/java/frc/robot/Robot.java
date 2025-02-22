@@ -61,6 +61,7 @@ public class Robot extends TimedRobot {
     // keep this and other reads early in Robot 
     SmartDashboard.putData("Field", m_field);
     stringList = new ArrayList<>();
+    stringList.add("New Path");
     stringList.add("start");
     stringList.add("leg2");
     // stringList.add("RightRight-E");
@@ -82,7 +83,7 @@ public class Robot extends TimedRobot {
             Trajectory traj = ChangePathPlannerPathtoTrajectory(currentPath,false);
             // Trajectory traj = ChangePathPlannerPathtoTrajectory(currentPath.mirrorPath(),false);
             // Trajectory traj = ChangePathPlannerPathtoTrajectory(currentPath.flipPath(),false);
-            this.displayPathData(str,traj,true,true); 
+            this.displayPathData(str,traj,false,false); 
     }
         
  
@@ -112,15 +113,15 @@ public class Robot extends TimedRobot {
       Trajectory a_trajectory = passedTrajectory;
       //publish paths to Field2d 
           if (toFlip && toMirror){
-            m_field.getObject(name + " mirror_flip").setPoses(currentPath.flipPath().mirrorPath().getPathPoses()); 
+           // m_field.getObject(name + " mirror_flip").setPoses(currentPath.flipPath().mirrorPath().getPathPoses()); 
           } else {
               if(toMirror){
-                m_field.getObject(name + " mirror").setPoses(currentPath.mirrorPath().getPathPoses());
+              //  m_field.getObject(name + " mirror").setPoses(currentPath.mirrorPath().getPathPoses());
               } 
               if (toFlip){
-               m_field.getObject(name + " flip").setPoses(currentPath.flipPath().mirrorPath().getPathPoses()); 
+              // m_field.getObject(name + " flip").setPoses(currentPath.flipPath().mirrorPath().getPathPoses()); 
               }
-             m_field.getObject(name + " primary").setPoses(currentPath.mirrorPath().getPathPoses());
+            // m_field.getObject(name + " primary").setPoses(currentPath.mirrorPath().getPathPoses());
           }
           // add pimary and converted trajectory path to field2d
           m_field.getObject(name + " primary").setPoses(currentPath.getPathPoses());
@@ -211,9 +212,9 @@ public class Robot extends TimedRobot {
 
         System.out.println("new Pose2d("+startPose.getTranslation().getX()+"," + startPose.getTranslation().getX()+", new Rotation2d(" + startPose.getRotation().getRadians() +"))," );
           for (PathPoint  point : pointList) {
-            System.out.println( "new Translation2d(" + point.position.getX()+"," + point.position.getY() + "))," );
+            System.out.println( "new Translation2d(" + point.position.getX()+"," + point.position.getY() + ")," );
           }
-        System.out.println("("+endPose.getTranslation().getX()+"," + endPose.getTranslation().getX()+", new Rotation2d(" + +endPose.getRotation().getRadians() +")),config" );
+        System.out.println("new Pose2d("+endPose.getTranslation().getX()+"," + endPose.getTranslation().getX()+", new Rotation2d(" + +endPose.getRotation().getRadians() +")),config" );
         System.out.println(" *****END PATH***** ");
 
     // convert to trajectory 
