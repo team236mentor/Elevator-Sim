@@ -107,19 +107,20 @@ public class Robot extends TimedRobot {
     public void displayPathData(String name, Trajectory passedTrajectory,boolean toMirror,boolean toFlip) {
       Trajectory a_trajectory = passedTrajectory;
       //publish paths to Field2d 
-      if (toFlip && toMirror){
-        m_field.getObject(name + " mirror_flip").setPoses(currentPath.flipPath().mirrorPath().getPathPoses()); 
-      } else {
-          if(toMirror){
-            m_field.getObject(name + " mirror").setPoses(currentPath.mirrorPath().getPathPoses());
-          } 
-          if (toFlip){
-            m_field.getObject(name + " flip").setPoses(currentPath.flipPath().mirrorPath().getPathPoses()); 
+          if (toFlip && toMirror){
+            m_field.getObject(name + " mirror_flip").setPoses(currentPath.flipPath().mirrorPath().getPathPoses()); 
+          } else {
+              if(toMirror){
+                //m_field.getObject(name + " mirror").setPoses(currentPath.mirrorPath().getPathPoses());
+              } 
+              if (toFlip){
+               // m_field.getObject(name + " flip").setPoses(currentPath.flipPath().mirrorPath().getPathPoses()); 
+              }
+            //m_field.getObject(name + " primary").setPoses(currentPath.mirrorPath().getPathPoses());
           }
-        m_field.getObject(name + " primary").setPoses(currentPath.mirrorPath().getPathPoses());
-      }
-      m_field.getObject(name + " primary").setPoses(currentPath.mirrorPath().getPathPoses());
-      m_field.getObject(name + " trajectory").setTrajectory(a_trajectory);
+          // add pimary and converted trajectory path to field2d
+          m_field.getObject(name + " primary").setPoses(currentPath.getPathPoses());
+          m_field.getObject(name + " trajectory").setTrajectory(a_trajectory);
         
         // m_field.getObject("trajectory").setTrajectory(ChangePathPlannerPathtoTrajectory(currentPath,true ) );
         // overlay starting ending pose with correct angle
@@ -178,27 +179,23 @@ public class Robot extends TimedRobot {
         System.out.println("error" + e); 
       }
 
-      System.out.println("*****"+ path.name.toString() + "***** ");
-
-      for (PathPoint  point : pointList) {
-        System.out.println( "(" + point.position.getX()+"," + point.position.getY() + ")" );
-        trimList.add(point.position);
-      }
-      System.out.println("************* ");
+      // publish the PathPoints to terminal 
+          //   System.out.println("***** PathPoints: "+ path.name.toString() + "***** ");
+//   
+          //   for (PathPoint  point : pointList) {
+          //      System.out.println( "(" + point.position.getX()+"," + point.position.getY() + ")" );
+          //      trimList.add(point.position);
+          //   }
+          //   System.out.println("****END PathPoints ***** ");
 
       // remove the LAST and FIRST entree without modifying original pointList
       trimList.remove(0 );              // FIRST pose2d position removed
       trimList.remove(trimList.size()-1);    // LAST pose2d position removed
 
-      start = path.getWaypoints().get(0).anchor().div(1);
-      end = path.getWaypoints().get(1).anchor().div(1);
-
-      // trouble shooting 
-        // System.out.println("getWayPoints(0) :" + start );
-        // System.out.println("getWayPoints(1) :" + end );
-      
-      startRotation = path.getIdealStartingState().rotation();
-      endRotation = path.getGoalEndState().rotation();
+        start = path.getWaypoints().get(0).anchor().div(1);
+        end = path.getWaypoints().get(1).anchor().div(1);
+        startRotation = path.getIdealStartingState().rotation();
+        endRotation = path.getGoalEndState().rotation();
 
       startPose = new Pose2d( start , startRotation);
       endPose = new Pose2d(end , endRotation);
@@ -206,12 +203,13 @@ public class Robot extends TimedRobot {
       TrajectoryConfig config = new TrajectoryConfig(4, 3.9) ;
 
       // setting up print of pathPlanning path 
-      System.out.println("("+startPose.getTranslation().getX()+"," + startPose.getTranslation().getX()+"," +startPose.getRotation().getRadians() +")" );
-        for (PathPoint  point : pointList) {
-          System.out.println( "(" + point.position.getX()+"," + point.position.getY() + ")" );
-        }
-      System.out.println("("+endPose.getTranslation().getX()+"," + endPose.getTranslation().getX()+"," +endPose.getRotation().getRadians() +")" );
-      System.out.println(" *****END***** ");
+      System.out.println("***** Path: "+ path.name.toString() + "***** ");
+        System.out.println("("+startPose.getTranslation().getX()+"," + startPose.getTranslation().getX()+"," +startPose.getRotation().getRadians() +")" );
+          for (PathPoint  point : pointList) {
+            System.out.println( "(" + point.position.getX()+"," + point.position.getY() + ")" );
+          }
+        System.out.println("("+endPose.getTranslation().getX()+"," + endPose.getTranslation().getX()+"," +endPose.getRotation().getRadians() +")" );
+      System.out.println(" *****END PATH***** ");
 
     // convert to trajectory 
     Trajectory exampleTrajectory = TrajectoryGenerator.generateTrajectory(
