@@ -62,6 +62,7 @@ public class Robot extends TimedRobot {
     SmartDashboard.putData("Field", m_field);
     stringList = new ArrayList<>();
     stringList.add("start");
+    stringList.add("leg2");
     // stringList.add("RightRight-E");
     // stringList.add("Reef-K_Coral-10");
     System.out.println(stringList.toString());
@@ -79,7 +80,7 @@ public class Robot extends TimedRobot {
         System.out.println("Exception currentPath read :");e.printStackTrace();
       }       
             Trajectory traj = ChangePathPlannerPathtoTrajectory(currentPath,false);
-            this.displayPathData(str,traj,false,false); 
+            this.displayPathData(str,traj,true,true); 
     }
         
  
@@ -112,12 +113,12 @@ public class Robot extends TimedRobot {
             m_field.getObject(name + " mirror_flip").setPoses(currentPath.flipPath().mirrorPath().getPathPoses()); 
           } else {
               if(toMirror){
-                // m_field.getObject(name + " mirror").setPoses(currentPath.mirrorPath().getPathPoses());
+                m_field.getObject(name + " mirror").setPoses(currentPath.mirrorPath().getPathPoses());
               } 
               if (toFlip){
-               // m_field.getObject(name + " flip").setPoses(currentPath.flipPath().mirrorPath().getPathPoses()); 
+               m_field.getObject(name + " flip").setPoses(currentPath.flipPath().mirrorPath().getPathPoses()); 
               }
-            //m_field.getObject(name + " primary").setPoses(currentPath.mirrorPath().getPathPoses());
+             m_field.getObject(name + " primary").setPoses(currentPath.mirrorPath().getPathPoses());
           }
           // add pimary and converted trajectory path to field2d
           m_field.getObject(name + " primary").setPoses(currentPath.getPathPoses());
