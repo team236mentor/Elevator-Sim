@@ -80,6 +80,8 @@ public class Robot extends TimedRobot {
         System.out.println("Exception currentPath read :");e.printStackTrace();
       }       
             Trajectory traj = ChangePathPlannerPathtoTrajectory(currentPath,false);
+            // Trajectory traj = ChangePathPlannerPathtoTrajectory(currentPath.mirrorPath(),false);
+            // Trajectory traj = ChangePathPlannerPathtoTrajectory(currentPath.flipPath(),false);
             this.displayPathData(str,traj,true,true); 
     }
         
