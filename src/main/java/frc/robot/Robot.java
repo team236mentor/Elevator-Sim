@@ -124,7 +124,9 @@ public class Robot extends TimedRobot {
             // m_field.getObject(name + " primary").setPoses(currentPath.mirrorPath().getPathPoses());
           }
           // add pimary and converted trajectory path to field2d
+          m_field.getObject(name+"pose1").setPose(startPose);
           m_field.getObject(name + " primary").setPoses(currentPath.getPathPoses());
+          m_field.getObject(name+"pose2").setPose(endPose);
           //m_field.getObject(name + " trajectory").setTrajectory(a_trajectory);
         
         // m_field.getObject("trajectory").setTrajectory(ChangePathPlannerPathtoTrajectory(currentPath,true ) );
@@ -189,7 +191,7 @@ public class Robot extends TimedRobot {
 //   
           for (PathPoint  point : pointList) {
           //    System.out.println( "(" + point.position.getX()+"," + point.position.getY() + ")" );
-                trimList.add(point.position);
+              trimList.add(point.position);
           }
           //   System.out.println("****END PathPoints ***** ");
 
@@ -210,11 +212,11 @@ public class Robot extends TimedRobot {
       // setting up print of pathPlanning path 
       System.out.println("***** Path: "+ path.name.toString() + "***** ");
 
-        System.out.println("new Pose2d("+startPose.getTranslation().getX()+"," + startPose.getTranslation().getX()+", new Rotation2d(" + startPose.getRotation().getRadians() +"))," );
-          for (PathPoint  point : pointList) {
+        System.out.println("new Pose2d("+startPose.getTranslation().getX()+"," + startPose.getTranslation().getY()+", new Rotation2d(" + startPose.getRotation().getRadians() +"))," );
+          for (PathPoint  point : trimList) {
             System.out.println( "new Translation2d(" + point.position.getX()+"," + point.position.getY() + ")," );
           }
-        System.out.println("new Pose2d("+endPose.getTranslation().getX()+"," + endPose.getTranslation().getX()+", new Rotation2d(" + +endPose.getRotation().getRadians() +")),config" );
+        System.out.println("new Pose2d("+endPose.getTranslation().getX()+"," + endPose.getTranslation().getY()+", new Rotation2d(" + +endPose.getRotation().getRadians() +")),config" );
         System.out.println(" *****END PATH***** ");
 
     // convert to trajectory 
