@@ -208,13 +208,13 @@ public class Robot extends TimedRobot {
 
       // setting up print of pathPlanning path 
       System.out.println("***** Path: "+ path.name.toString() + "***** ");
-       System.out.println("new Pose2d(");
-        System.out.println("("+startPose.getTranslation().getX()+"," + startPose.getTranslation().getX()+"," +startPose.getRotation().getRadians() +")" );
+
+        System.out.println("new Pose2d("+startPose.getTranslation().getX()+"," + startPose.getTranslation().getX()+", new Rotation2d(" + startPose.getRotation().getRadians() +"))," );
           for (PathPoint  point : pointList) {
-            System.out.println( "(" + point.position.getX()+"," + point.position.getY() + ")" );
+            System.out.println( "new Translation2d(" + point.position.getX()+"," + point.position.getY() + "))," );
           }
-        System.out.println("("+endPose.getTranslation().getX()+"," + endPose.getTranslation().getX()+"," +endPose.getRotation().getRadians() +")" );
-      System.out.println(" *****END PATH***** ");
+        System.out.println("("+endPose.getTranslation().getX()+"," + endPose.getTranslation().getX()+", new Rotation2d(" + +endPose.getRotation().getRadians() +")),config" );
+        System.out.println(" *****END PATH***** ");
 
     // convert to trajectory 
     Trajectory exampleTrajectory = TrajectoryGenerator.generateTrajectory(
