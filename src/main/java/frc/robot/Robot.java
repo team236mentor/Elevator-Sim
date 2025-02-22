@@ -61,8 +61,9 @@ public class Robot extends TimedRobot {
     // keep this and other reads early in Robot 
     SmartDashboard.putData("Field", m_field);
     stringList = new ArrayList<>();
-    stringList.add("RightRight-E");
-    stringList.add("Reef-K_Coral-10");
+    stringList.add("start");
+    // stringList.add("RightRight-E");
+    // stringList.add("Reef-K_Coral-10");
     System.out.println(stringList.toString());
 
     for (String str : stringList) {
@@ -111,7 +112,7 @@ public class Robot extends TimedRobot {
             m_field.getObject(name + " mirror_flip").setPoses(currentPath.flipPath().mirrorPath().getPathPoses()); 
           } else {
               if(toMirror){
-                //m_field.getObject(name + " mirror").setPoses(currentPath.mirrorPath().getPathPoses());
+                // m_field.getObject(name + " mirror").setPoses(currentPath.mirrorPath().getPathPoses());
               } 
               if (toFlip){
                // m_field.getObject(name + " flip").setPoses(currentPath.flipPath().mirrorPath().getPathPoses()); 
@@ -120,7 +121,7 @@ public class Robot extends TimedRobot {
           }
           // add pimary and converted trajectory path to field2d
           m_field.getObject(name + " primary").setPoses(currentPath.getPathPoses());
-          m_field.getObject(name + " trajectory").setTrajectory(a_trajectory);
+          //m_field.getObject(name + " trajectory").setTrajectory(a_trajectory);
         
         // m_field.getObject("trajectory").setTrajectory(ChangePathPlannerPathtoTrajectory(currentPath,true ) );
         // overlay starting ending pose with correct angle
@@ -182,10 +183,10 @@ public class Robot extends TimedRobot {
       // publish the PathPoints to terminal 
           //   System.out.println("***** PathPoints: "+ path.name.toString() + "***** ");
 //   
-          //   for (PathPoint  point : pointList) {
-          //      System.out.println( "(" + point.position.getX()+"," + point.position.getY() + ")" );
-          //      trimList.add(point.position);
-          //   }
+          for (PathPoint  point : pointList) {
+          //    System.out.println( "(" + point.position.getX()+"," + point.position.getY() + ")" );
+                trimList.add(point.position);
+          }
           //   System.out.println("****END PathPoints ***** ");
 
       // remove the LAST and FIRST entree without modifying original pointList
