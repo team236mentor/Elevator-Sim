@@ -49,7 +49,7 @@ public class Robot extends TimedRobot {
   private Pose2d startPose, endPose;
   
   public List<Translation2d> midWaypoints = new ArrayList<>();
-  private Translation2d start , end;
+  private Translation2d start, end;
   private RobotConfig roboConfig;
     
 // private List<Translation2d> interiorWaypoints = null;
@@ -61,8 +61,11 @@ public class Robot extends TimedRobot {
     // keep this and other reads early in Robot 
     SmartDashboard.putData("Field", m_field);
     stringList = new ArrayList<>();
-    stringList.add("RightRight-E");
-    stringList.add("Reef-K_Coral-10");
+    stringList.add("New Path");
+    stringList.add("start");
+    stringList.add("leg2");
+    // stringList.add("RightRight-E");
+    // stringList.add("Reef-K_Coral-10");
     System.out.println(stringList.toString());
 
     for (String str : stringList) {
@@ -78,6 +81,8 @@ public class Robot extends TimedRobot {
         System.out.println("Exception currentPath read :");e.printStackTrace();
       }       
             Trajectory traj = ChangePathPlannerPathtoTrajectory(currentPath,false);
+            // Trajectory traj = ChangePathPlannerPathtoTrajectory(currentPath.mirrorPath(),false);
+            // Trajectory traj = ChangePathPlannerPathtoTrajectory(currentPath.flipPath(),false);
             this.displayPathData(str,traj,false,false); 
     }
         
@@ -108,19 +113,21 @@ public class Robot extends TimedRobot {
       Trajectory a_trajectory = passedTrajectory;
       //publish paths to Field2d 
           if (toFlip && toMirror){
-            m_field.getObject(name + " mirror_flip").setPoses(currentPath.flipPath().mirrorPath().getPathPoses()); 
+           // m_field.getObject(name + " mirror_flip").setPoses(currentPath.flipPath().mirrorPath().getPathPoses()); 
           } else {
               if(toMirror){
-                //m_field.getObject(name + " mirror").setPoses(currentPath.mirrorPath().getPathPoses());
+              //  m_field.getObject(name + " mirror").setPoses(currentPath.mirrorPath().getPathPoses());
               } 
               if (toFlip){
-               // m_field.getObject(name + " flip").setPoses(currentPath.flipPath().mirrorPath().getPathPoses()); 
+              // m_field.getObject(name + " flip").setPoses(currentPath.flipPath().mirrorPath().getPathPoses()); 
               }
-            //m_field.getObject(name + " primary").setPoses(currentPath.mirrorPath().getPathPoses());
+            // m_field.getObject(name + " primary").setPoses(currentPath.mirrorPath().getPathPoses());
           }
           // add pimary and converted trajectory path to field2d
+          m_field.getObject(name+"pose1").setPose(startPose);
           m_field.getObject(name + " primary").setPoses(currentPath.getPathPoses());
-          m_field.getObject(name + " trajectory").setTrajectory(a_trajectory);
+          m_field.getObject(name+"pose2").setPose(endPose);
+          //m_field.getObject(name + " trajectory").setTrajectory(a_trajectory);
         
         // m_field.getObject("trajectory").setTrajectory(ChangePathPlannerPathtoTrajectory(currentPath,true ) );
         // overlay starting ending pose with correct angle
@@ -174,6 +181,7 @@ public class Robot extends TimedRobot {
      * starting to convert a specific pathPlannerPath to wpilib trajectory 
      * this should be method or own utility class for conversion    */
     try {
+      pointList.clear();
       pointList= path.getAllPathPoints();
       } catch (Exception e) { 
         System.out.println("error" + e); 
@@ -182,11 +190,13 @@ public class Robot extends TimedRobot {
       // publish the PathPoints to terminal 
           //   System.out.println("***** PathPoints: "+ path.name.toString() + "***** ");
 //   
-          //   for (PathPoint  point : pointList) {
-          //      System.out.println( "(" + point.position.getX()+"," + point.position.getY() + ")" );
-          //      trimList.add(point.position);
-          //   }
-          //   System.out.println("****END PathPoints ***** ");
+          for (PathPoint  point : pointList) {
+            pointList.clear();
+           if ( pointList.indexOf(point)%3 !=0 ) {
+              trimList.add(point.position);
+           } else {  /* skip the point do nothing  */   }
+          }
+
 
       // remove the LAST and FIRST entree without modifying original pointList
       trimList.remove(0 );              // FIRST pose2d position removed
@@ -204,12 +214,13 @@ public class Robot extends TimedRobot {
 
       // setting up print of pathPlanning path 
       System.out.println("***** Path: "+ path.name.toString() + "***** ");
-        System.out.println("("+startPose.getTranslation().getX()+"," + startPose.getTranslation().getX()+"," +startPose.getRotation().getRadians() +")" );
-          for (PathPoint  point : pointList) {
-            System.out.println( "(" + point.position.getX()+"," + point.position.getY() + ")" );
+
+        System.out.println("new Pose2d("+startPose.getTranslation().getX()+"," + startPose.getTranslation().getY()+", new Rotation2d(" + startPose.getRotation().getRadians() +"))," );
+          for (Translation2d  positions : trimList) {
+            System.out.println( "new Translation2d(" + positions.getX()+"," + positions.getY() + ")," );
           }
-        System.out.println("("+endPose.getTranslation().getX()+"," + endPose.getTranslation().getX()+"," +endPose.getRotation().getRadians() +")" );
-      System.out.println(" *****END PATH***** ");
+        System.out.println("new Pose2d("+endPose.getTranslation().getX()+"," + endPose.getTranslation().getY()+", new Rotation2d(" + +endPose.getRotation().getRadians() +")),config" );
+        System.out.println(" *****END PATH***** ");
 
     // convert to trajectory 
     Trajectory exampleTrajectory = TrajectoryGenerator.generateTrajectory(
